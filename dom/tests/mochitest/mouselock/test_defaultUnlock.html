@@ -21,6 +21,7 @@ https://bugzilla.mozilla.org/show_bug.cgi?id=633602
   <pre id="test">
     <script>
       SimpleTest.waitForExplicitFinish();
+      var oldPrefVal = SpecialPowers.getBoolPref("full-screen-api.allow-trusted-requests-only");
       SpecialPowers.setBoolPref("full-screen-api.allow-trusted-requests-only", false);
 
       const canvas = document.getElementById("canvas");
@@ -32,18 +33,20 @@ https://bugzilla.mozilla.org/show_bug.cgi?id=633602
         synthesizeKey("VK_ESCAPE", { type: "keydown" }, window);
         synthesizeKey("VK_ESCAPE", { type: "keyup" }, window);
       };
-      
+
       var onLockFail = function (e) {
         ok(false, "Lock()'s failed callback was called, lock() did not succeed");
         SimpleTest.finish();
       };
-      
+
       var onFullScreen = function (e) {
         if (!runOnce) {
           runOnce = true;
           pointer.lock(canvas, onLockGet, onLockFail);
         } else {
           ok(!pointer.islocked(), "Element should be unlocked after ESC key was injected");
+
+          SpecialPowers.setBoolPref("full-screen-api.allow-trusted-requests-only", oldPrefVal);
           SimpleTest.finish();
         }
       };
